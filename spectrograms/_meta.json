@@ -1,0 +1,45 @@
+{
+  "settings_hash": "34953af4d0c2654c4c966407741115e425d08059d490aa622b33ab25b4c7b751",
+  "settings": {
+    "normalization_version": 2,
+    "format": "png",
+    "dpi": 130,
+    "figsize": [
+      7.0,
+      3.2
+    ],
+    "cmap": "magma",
+    "xlabel": "",
+    "ylabel": "",
+    "y_scale": "linear",
+    "show_colorbar": false,
+    "colorbar_label": "",
+    "show_title": false,
+    "title_template": "{sample_name}",
+    "show_axis_labels": false,
+    "show_axis_ticks": false,
+    "hide_axes": true,
+    "nfft": 1024,
+    "noverlap": 768,
+    "sample_rate": null,
+    "mono": true,
+    "transparent": false,
+    "vmin": null,
+    "vmax": null,
+    "normalize_max_db_per_section": true,
+    "normalize_dynamic_range_db": 120.0
+  },
+  "section_normalization": {
+    "enabled": true,
+    "sections": {
+      "conditional-generation": {
+        "signature": "426f8d0c7d5e821d3ede3cbb559226cdd14c91f7882d1958c190faa2496e2b0d",
+        "max_db": -10.336155609699238
+      },
+      "unconditional-generation": {
+        "signature": "36e448e00f3a6b3441b288aad1452f755731f7a5f841f63bc26a80639c464bfa",
+        "max_db": -12.619799263637844
+      }
+    }
+  }
+}

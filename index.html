@@ -1,21 +1,1631 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Anonymous Audio Samples</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Audio Examples</title>
+  <style>
+    :root {
+      --bg: #f3f5f9;
+      --surface: #ffffff;
+      --surface-soft: #f7f9fc;
+      --line: #d9dfeb;
+      --text: #1f2633;
+      --muted: #627084;
+      --accent: #265ec7;
+      --accent-soft: #eaf1ff;
+      --danger: #b34b43;
+      --radius: 14px;
+      --shadow: 0 10px 24px rgba(24, 34, 54, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, #f7f8fb, #eff2f8);
+      color: var(--text);
+      font: 16px/1.45 "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body { padding: 24px; }
+
+    .wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .site-card,
+    .panel,
+    .card,
+    .empty {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .site-card {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .sub,
+    .meta,
+    .tiny,
+    .section-text {
+      color: var(--muted);
+    }
+
+    .sub { margin: 0; }
+
+    .sections-root {
+      display: grid;
+      gap: 16px;
+    }
+
+    .section {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      border: 1px solid #ced7e8;
+      border-left: 4px solid #9eb9eb;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #fbfcff, #f7f9fd);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 14px rgba(24, 34, 54, 0.05);
+    }
+
+    .section-header {
+      display: grid;
+      gap: 4px;
+      padding: 2px 2px 8px;
+    }
+
+    .section-text {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    .panel {
+      padding: 12px;
+      box-shadow: none;
+      border-color: #d4dcec;
+    }
+
+    .tabs,
+    .label-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .label-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .label-hint {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .sample-nav {
+      display: grid;
+      grid-template-columns: auto minmax(220px, 360px) auto auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button,
+    select {
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font: inherit;
+    }
+
+    button { cursor: pointer; }
+
+    button:hover,
+    select:hover {
+      border-color: #b8c3d6;
+    }
+
+    button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .models {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .sample-name {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px 10px;
+      background: var(--surface-soft);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: nowrap;
+      overflow: auto;
+    }
+
+    audio { width: 100%; }
+
+    .spectrogram-wrap {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .spectrogram-stage {
+      position: relative;
+      line-height: 0;
+      cursor: pointer;
+    }
+
+    .spectrogram-img {
+      width: 100%;
+      display: block;
+      height: auto;
+    }
+
+    .spectrogram-cursor {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 2px;
+      background: #2a65dd;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
+      pointer-events: none;
+    }
+
+    .spectrogram-slider {
+      width: 100%;
+      margin: 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      background: #fff;
+      padding: 8px 10px;
+    }
+
+    .missing {
+      color: var(--danger);
+      border: 1px dashed #e7b7b1;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff3f2;
+    }
+
+    .tiny {
+      font-size: 13px;
+    }
+
+    .source-note {
+      margin-top: -2px;
+    }
+
+    .source-link {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(38, 94, 199, 0.35);
+    }
+
+    .source-link:hover {
+      border-bottom-color: rgba(38, 94, 199, 0.8);
+    }
+
+    .empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .kbd {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1px 7px;
+      background: var(--surface-soft);
+      font-size: 12px;
+    }
+
+    .toc {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-soft);
+      padding: 10px 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .toc-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .toc-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toc-link {
+      text-decoration: none;
+      color: var(--accent);
+      border: 1px solid #ccd9f2;
+      border-radius: 999px;
+      background: #f0f5ff;
+      padding: 5px 10px;
+      font-size: 13px;
+    }
+
+    .toc-link:hover {
+      border-color: #aebee0;
+      background: #e9f0ff;
+    }
+
+    @media (max-width: 980px) {
+      .sample-nav {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+      }
+
+      .sample-nav .meta {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
 </head>
+<body>
+  <div class="wrap">
+    <main class="site-card">
+      <header>
+        <h1 id="page-title">Audio Examples</h1>
+        <p class="sub" id="page-description">Side-by-side comparison of generated audio samples.</p>
+        <p class="tiny" style="margin:8px 0 0">
+          Keyboard inside hovered section: <span class="kbd">&#8592;</span>/<span class="kbd">&#8594;</span> sample, <span class="kbd">0-9</span> label.
+        </p>
+      </header>
+      <nav class="toc" id="toc"></nav>
+      <div id="sections-root" class="sections-root"></div>
+    </main>
+  </div>
 
-<body style="font-family:Arial; max-width:800px; margin:40px auto">
+  <script id="manifest-data" type="application/json">__AUDIO_EXAMPLES_MANIFEST_START__
+{
+  "site_title": "Repurposing a Speech Classifier for Guided Diffusion-Based Speech Generation: audio examples.",
+  "description": "This page presents audio examples generated on the Speech Commands 09 benchmark: one-second spoken digit recordings sampled at 16 kHz. The main comparisons focus on two model families — a standard U-Net baseline and our proposed classifier-based diffusion model with Score Subnet adaptation, shown in two variants. The sections below cover both the main results and data-restricted ablations, allowing direct side-by-side comparison across aligned samples, labels, and training regimes.",
+  "default_label": "label_00",
+  "labels": [
+    "label_00",
+    "label_01",
+    "label_02",
+    "label_03",
+    "label_04",
+    "label_05",
+    "label_06",
+    "label_07",
+    "label_08",
+    "label_09"
+  ],
+  "spectrograms": {
+    "enabled": true,
+    "output_subdir": "spectrograms",
+    "format": "png",
+    "workers": 10,
+    "normalize_max_db_per_section": true,
+    "normalize_dynamic_range_db": 120.0
+  },
+  "sections": [
+    {
+      "id": "unconditional-generation",
+      "title": "Unconditional Generation",
+      "text": "This section compares unconditional generation quality across the main models. In addition to the U-Net baseline and the proposed Score Subnet model variants, we include three open-source reference models to place the results in a broader context. Since no target label is provided, the comparison highlights overall realism, intelligibility and artifacts.",
+      "groups": [
+        "unconditional-generation"
+      ]
+    },
+    {
+      "id": "conditional-generation",
+      "title": "Conditional Generation",
+      "text": "Here, models are guided toward a target spoken digit. By switching labels and samples, you can compare how well each method follows class information while preserving perceptual quality.",
+      "groups": [
+        "conditional-generation"
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "unconditional-generation",
+      "title": "Unconditional Generation",
+      "text": "",
+      "section_id": "unconditional-generation",
+      "section_title": "Unconditional Generation",
+      "models": [
+        {
+          "id": "opensource-diffwave-1m",
+          "title": "OpenSource: DiffWave 1M",
+          "sample_source_text": "Samples from",
+          "sample_source_url": "https://huggingface.co/krandiash/sashimi-release",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_000.wav",
+                "audio_001.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_001.wav",
+                "audio_002.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_002.wav",
+                "audio_003.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_003.wav",
+                "audio_004.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_004.wav",
+                "audio_005.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_005.wav",
+                "audio_006.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_006.wav",
+                "audio_007.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_007.wav",
+                "audio_008.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_008.wav",
+                "audio_009.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_009.wav",
+                "audio_010.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_010.wav",
+                "audio_011.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_011.wav",
+                "audio_012.wav": "audio/unconditional-generation/opensource-diffwave-1m/audio_012.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_000.png",
+                "audio_001.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_001.png",
+                "audio_002.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_002.png",
+                "audio_003.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_003.png",
+                "audio_004.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_004.png",
+                "audio_005.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_005.png",
+                "audio_006.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_006.png",
+                "audio_007.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_007.png",
+                "audio_008.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_008.png",
+                "audio_009.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_009.png",
+                "audio_010.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_010.png",
+                "audio_011.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_011.png",
+                "audio_012.wav": "spectrograms/unconditional-generation/opensource-diffwave-1m/audio_012.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "opensource-sashimi-800k",
+          "title": "OpenSource: Sashimi DiffWave 800K",
+          "sample_source_text": "Samples from",
+          "sample_source_url": "https://huggingface.co/krandiash/sashimi-release",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_000.wav",
+                "audio_001.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_001.wav",
+                "audio_002.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_002.wav",
+                "audio_003.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_003.wav",
+                "audio_004.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_004.wav",
+                "audio_005.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_005.wav",
+                "audio_006.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_006.wav",
+                "audio_007.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_007.wav",
+                "audio_008.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_008.wav",
+                "audio_009.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_009.wav",
+                "audio_010.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_010.wav",
+                "audio_011.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_011.wav",
+                "audio_012.wav": "audio/unconditional-generation/opensource-sashimi-800k/audio_012.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_000.png",
+                "audio_001.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_001.png",
+                "audio_002.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_002.png",
+                "audio_003.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_003.png",
+                "audio_004.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_004.png",
+                "audio_005.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_005.png",
+                "audio_006.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_006.png",
+                "audio_007.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_007.png",
+                "audio_008.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_008.png",
+                "audio_009.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_009.png",
+                "audio_010.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_010.png",
+                "audio_011.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_011.png",
+                "audio_012.wav": "spectrograms/unconditional-generation/opensource-sashimi-800k/audio_012.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "opensource-edmsound",
+          "title": "OpenSource: EDM Sound",
+          "sample_source_text": "Samples from (only 6 available)",
+          "sample_source_url": "https://agentcooper2002.github.io/EDMSound/",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "audio/unconditional-generation/opensource-edmsound/audio_000.wav",
+                "audio_001.wav": "audio/unconditional-generation/opensource-edmsound/audio_001.wav",
+                "audio_002.wav": "audio/unconditional-generation/opensource-edmsound/audio_002.wav",
+                "audio_003.wav": "audio/unconditional-generation/opensource-edmsound/audio_003.wav",
+                "audio_004.wav": "audio/unconditional-generation/opensource-edmsound/audio_004.wav",
+                "audio_005.wav": "audio/unconditional-generation/opensource-edmsound/audio_005.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "spectrograms/unconditional-generation/opensource-edmsound/audio_000.png",
+                "audio_001.wav": "spectrograms/unconditional-generation/opensource-edmsound/audio_001.png",
+                "audio_002.wav": "spectrograms/unconditional-generation/opensource-edmsound/audio_002.png",
+                "audio_003.wav": "spectrograms/unconditional-generation/opensource-edmsound/audio_003.png",
+                "audio_004.wav": "spectrograms/unconditional-generation/opensource-edmsound/audio_004.png",
+                "audio_005.wav": "spectrograms/unconditional-generation/opensource-edmsound/audio_005.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "mine-model-a",
+          "title": "U-Net",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "audio/unconditional-generation/mine-model-a/audio_000.wav",
+                "audio_001.wav": "audio/unconditional-generation/mine-model-a/audio_001.wav",
+                "audio_002.wav": "audio/unconditional-generation/mine-model-a/audio_002.wav",
+                "audio_003.wav": "audio/unconditional-generation/mine-model-a/audio_003.wav",
+                "audio_004.wav": "audio/unconditional-generation/mine-model-a/audio_004.wav",
+                "audio_005.wav": "audio/unconditional-generation/mine-model-a/audio_005.wav",
+                "audio_006.wav": "audio/unconditional-generation/mine-model-a/audio_006.wav",
+                "audio_007.wav": "audio/unconditional-generation/mine-model-a/audio_007.wav",
+                "audio_008.wav": "audio/unconditional-generation/mine-model-a/audio_008.wav",
+                "audio_009.wav": "audio/unconditional-generation/mine-model-a/audio_009.wav",
+                "audio_010.wav": "audio/unconditional-generation/mine-model-a/audio_010.wav",
+                "audio_011.wav": "audio/unconditional-generation/mine-model-a/audio_011.wav",
+                "audio_012.wav": "audio/unconditional-generation/mine-model-a/audio_012.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "spectrograms/unconditional-generation/mine-model-a/audio_000.png",
+                "audio_001.wav": "spectrograms/unconditional-generation/mine-model-a/audio_001.png",
+                "audio_002.wav": "spectrograms/unconditional-generation/mine-model-a/audio_002.png",
+                "audio_003.wav": "spectrograms/unconditional-generation/mine-model-a/audio_003.png",
+                "audio_004.wav": "spectrograms/unconditional-generation/mine-model-a/audio_004.png",
+                "audio_005.wav": "spectrograms/unconditional-generation/mine-model-a/audio_005.png",
+                "audio_006.wav": "spectrograms/unconditional-generation/mine-model-a/audio_006.png",
+                "audio_007.wav": "spectrograms/unconditional-generation/mine-model-a/audio_007.png",
+                "audio_008.wav": "spectrograms/unconditional-generation/mine-model-a/audio_008.png",
+                "audio_009.wav": "spectrograms/unconditional-generation/mine-model-a/audio_009.png",
+                "audio_010.wav": "spectrograms/unconditional-generation/mine-model-a/audio_010.png",
+                "audio_011.wav": "spectrograms/unconditional-generation/mine-model-a/audio_011.png",
+                "audio_012.wav": "spectrograms/unconditional-generation/mine-model-a/audio_012.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "mine-model-b",
+          "title": "Score Subnet",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "audio/unconditional-generation/mine-model-b/audio_000.wav",
+                "audio_001.wav": "audio/unconditional-generation/mine-model-b/audio_001.wav",
+                "audio_002.wav": "audio/unconditional-generation/mine-model-b/audio_002.wav",
+                "audio_003.wav": "audio/unconditional-generation/mine-model-b/audio_003.wav",
+                "audio_004.wav": "audio/unconditional-generation/mine-model-b/audio_004.wav",
+                "audio_005.wav": "audio/unconditional-generation/mine-model-b/audio_005.wav",
+                "audio_006.wav": "audio/unconditional-generation/mine-model-b/audio_006.wav",
+                "audio_007.wav": "audio/unconditional-generation/mine-model-b/audio_007.wav",
+                "audio_008.wav": "audio/unconditional-generation/mine-model-b/audio_008.wav",
+                "audio_009.wav": "audio/unconditional-generation/mine-model-b/audio_009.wav",
+                "audio_010.wav": "audio/unconditional-generation/mine-model-b/audio_010.wav",
+                "audio_011.wav": "audio/unconditional-generation/mine-model-b/audio_011.wav",
+                "audio_012.wav": "audio/unconditional-generation/mine-model-b/audio_012.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "spectrograms/unconditional-generation/mine-model-b/audio_000.png",
+                "audio_001.wav": "spectrograms/unconditional-generation/mine-model-b/audio_001.png",
+                "audio_002.wav": "spectrograms/unconditional-generation/mine-model-b/audio_002.png",
+                "audio_003.wav": "spectrograms/unconditional-generation/mine-model-b/audio_003.png",
+                "audio_004.wav": "spectrograms/unconditional-generation/mine-model-b/audio_004.png",
+                "audio_005.wav": "spectrograms/unconditional-generation/mine-model-b/audio_005.png",
+                "audio_006.wav": "spectrograms/unconditional-generation/mine-model-b/audio_006.png",
+                "audio_007.wav": "spectrograms/unconditional-generation/mine-model-b/audio_007.png",
+                "audio_008.wav": "spectrograms/unconditional-generation/mine-model-b/audio_008.png",
+                "audio_009.wav": "spectrograms/unconditional-generation/mine-model-b/audio_009.png",
+                "audio_010.wav": "spectrograms/unconditional-generation/mine-model-b/audio_010.png",
+                "audio_011.wav": "spectrograms/unconditional-generation/mine-model-b/audio_011.png",
+                "audio_012.wav": "spectrograms/unconditional-generation/mine-model-b/audio_012.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "mine-model-c",
+          "title": "Score Subnet -> no gradient taps",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "audio/unconditional-generation/mine-model-c/audio_000.wav",
+                "audio_001.wav": "audio/unconditional-generation/mine-model-c/audio_001.wav",
+                "audio_002.wav": "audio/unconditional-generation/mine-model-c/audio_002.wav",
+                "audio_003.wav": "audio/unconditional-generation/mine-model-c/audio_003.wav",
+                "audio_004.wav": "audio/unconditional-generation/mine-model-c/audio_004.wav",
+                "audio_005.wav": "audio/unconditional-generation/mine-model-c/audio_005.wav",
+                "audio_006.wav": "audio/unconditional-generation/mine-model-c/audio_006.wav",
+                "audio_007.wav": "audio/unconditional-generation/mine-model-c/audio_007.wav",
+                "audio_008.wav": "audio/unconditional-generation/mine-model-c/audio_008.wav",
+                "audio_009.wav": "audio/unconditional-generation/mine-model-c/audio_009.wav",
+                "audio_010.wav": "audio/unconditional-generation/mine-model-c/audio_010.wav",
+                "audio_011.wav": "audio/unconditional-generation/mine-model-c/audio_011.wav",
+                "audio_012.wav": "audio/unconditional-generation/mine-model-c/audio_012.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_all": {
+                "audio_000.wav": "spectrograms/unconditional-generation/mine-model-c/audio_000.png",
+                "audio_001.wav": "spectrograms/unconditional-generation/mine-model-c/audio_001.png",
+                "audio_002.wav": "spectrograms/unconditional-generation/mine-model-c/audio_002.png",
+                "audio_003.wav": "spectrograms/unconditional-generation/mine-model-c/audio_003.png",
+                "audio_004.wav": "spectrograms/unconditional-generation/mine-model-c/audio_004.png",
+                "audio_005.wav": "spectrograms/unconditional-generation/mine-model-c/audio_005.png",
+                "audio_006.wav": "spectrograms/unconditional-generation/mine-model-c/audio_006.png",
+                "audio_007.wav": "spectrograms/unconditional-generation/mine-model-c/audio_007.png",
+                "audio_008.wav": "spectrograms/unconditional-generation/mine-model-c/audio_008.png",
+                "audio_009.wav": "spectrograms/unconditional-generation/mine-model-c/audio_009.png",
+                "audio_010.wav": "spectrograms/unconditional-generation/mine-model-c/audio_010.png",
+                "audio_011.wav": "spectrograms/unconditional-generation/mine-model-c/audio_011.png",
+                "audio_012.wav": "spectrograms/unconditional-generation/mine-model-c/audio_012.png"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "conditional-generation",
+      "title": "Conditional Generation",
+      "text": "",
+      "section_id": "conditional-generation",
+      "section_title": "Conditional Generation",
+      "models": [
+        {
+          "id": "mine-model-a",
+          "title": "U-Net + Classifier",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_00/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_00/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_00/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_00/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_00/audio_004.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_01/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_01/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_01/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_01/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_01/audio_004.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_02/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_02/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_02/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_02/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_02/audio_004.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_03/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_03/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_03/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_03/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_03/audio_004.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_04/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_04/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_04/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_04/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_04/audio_004.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_05/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_05/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_05/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_05/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_05/audio_004.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_06/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_06/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_06/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_06/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_06/audio_004.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_07/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_07/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_07/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_07/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_07/audio_004.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_08/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_08/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_08/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_08/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_08/audio_004.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-a/label_09/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-a/label_09/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-a/label_09/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-a/label_09/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-a/label_09/audio_004.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_00/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_00/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_00/audio_004.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_01/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_01/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_01/audio_004.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_02/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_02/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_02/audio_004.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_03/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_03/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_03/audio_004.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_04/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_04/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_04/audio_004.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_05/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_05/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_05/audio_004.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_06/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_06/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_06/audio_004.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_07/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_07/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_07/audio_004.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_08/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_08/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_08/audio_004.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-a/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-a/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-a/label_09/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-a/label_09/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-a/label_09/audio_004.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "mine-model-b",
+          "title": "Score Subnet",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_00/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_00/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_00/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_00/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_00/audio_004.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_01/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_01/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_01/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_01/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_01/audio_004.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_02/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_02/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_02/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_02/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_02/audio_004.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_03/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_03/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_03/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_03/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_03/audio_004.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_04/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_04/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_04/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_04/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_04/audio_004.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_05/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_05/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_05/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_05/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_05/audio_004.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_06/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_06/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_06/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_06/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_06/audio_004.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_07/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_07/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_07/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_07/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_07/audio_004.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_08/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_08/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_08/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_08/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_08/audio_004.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-b/label_09/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-b/label_09/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-b/label_09/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-b/label_09/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-b/label_09/audio_004.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_00/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_00/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_00/audio_004.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_01/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_01/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_01/audio_004.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_02/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_02/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_02/audio_004.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_03/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_03/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_03/audio_004.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_04/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_04/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_04/audio_004.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_05/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_05/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_05/audio_004.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_06/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_06/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_06/audio_004.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_07/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_07/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_07/audio_004.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_08/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_08/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_08/audio_004.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-b/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-b/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-b/label_09/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-b/label_09/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-b/label_09/audio_004.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "mine-model-c",
+          "title": "Score Subnet -> no gradient taps",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_00/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_00/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_00/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_00/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_00/audio_004.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_01/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_01/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_01/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_01/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_01/audio_004.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_02/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_02/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_02/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_02/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_02/audio_004.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_03/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_03/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_03/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_03/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_03/audio_004.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_04/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_04/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_04/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_04/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_04/audio_004.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_05/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_05/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_05/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_05/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_05/audio_004.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_06/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_06/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_06/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_06/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_06/audio_004.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_07/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_07/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_07/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_07/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_07/audio_004.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_08/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_08/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_08/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_08/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_08/audio_004.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/conditional-generation/mine-model-c/label_09/audio_000.wav",
+                "audio_001.wav": "audio/conditional-generation/mine-model-c/label_09/audio_001.wav",
+                "audio_002.wav": "audio/conditional-generation/mine-model-c/label_09/audio_002.wav",
+                "audio_003.wav": "audio/conditional-generation/mine-model-c/label_09/audio_003.wav",
+                "audio_004.wav": "audio/conditional-generation/mine-model-c/label_09/audio_004.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_00/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_00/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_00/audio_004.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_01/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_01/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_01/audio_004.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_02/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_02/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_02/audio_004.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_03/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_03/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_03/audio_004.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_04/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_04/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_04/audio_004.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_05/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_05/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_05/audio_004.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_06/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_06/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_06/audio_004.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_07/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_07/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_07/audio_004.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_08/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_08/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_08/audio_004.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_002.png",
+                "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_003.png",
+                "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_004.png"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+__AUDIO_EXAMPLES_MANIFEST_END__</script>
+  <script>
+    const manifestTag = document.getElementById("manifest-data");
+    let manifest = window.AUDIO_EXAMPLES_MANIFEST || null;
+    if (!manifest && manifestTag) {
+      const raw = (manifestTag.textContent || "")
+        .replace("__AUDIO_EXAMPLES_MANIFEST_START__", "")
+        .replace("__AUDIO_EXAMPLES_MANIFEST_END__", "")
+        .trim();
+      if (raw) {
+        try {
+          manifest = JSON.parse(raw);
+        } catch (error) {
+          manifest = null;
+        }
+      }
+    }
+    const root = document.getElementById("sections-root");
+    const toc = document.getElementById("toc");
+    const spectrogramsEnabled = !!(manifest && manifest.spectrograms && manifest.spectrograms.enabled);
 
-<h1>Anonymous Submission – Audio Samples</h1>
+    if (!manifest) {
+      root.innerHTML = '<div class="empty">Manifest is missing. Rebuild the page.</div>';
+      throw new Error("Missing embedded manifest");
+    }
 
-<p>
-This page hosts supplementary audio samples for anonymous peer review.
-</p>
+    const naturalCompare = (a, b) => String(a).localeCompare(String(b), undefined, {
+      numeric: true,
+      sensitivity: "base"
+    });
+    const genericSampleName = (index) => `audio_${String(index).padStart(3, "0")}.wav`;
+    const sectionDomId = (id) => `section-${String(id || "item").replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
 
-<p>
-Audio samples and code will be released after the review process.
-</p>
+    const allGroups = Array.isArray(manifest.groups) ? manifest.groups : [];
+    const groupsById = new Map(allGroups.map((group) => [group.id, group]));
 
+    function buildSections() {
+      if (Array.isArray(manifest.sections) && manifest.sections.length) {
+        return manifest.sections
+          .map((section) => {
+            const ids = Array.isArray(section.groups) ? section.groups : [];
+            const groups = ids.map((id) => groupsById.get(id)).filter(Boolean);
+            return {
+              id: section.id,
+              title: section.title || section.id,
+              text: section.text || "",
+              groups
+            };
+          })
+          .filter((section) => section.groups.length > 0);
+      }
+
+      if (!allGroups.length) return [];
+      return [{ id: "all", title: "Results", text: "", groups: allGroups }];
+    }
+
+    const sections = buildSections();
+    document.getElementById("page-title").textContent = manifest.site_title || "Audio Examples";
+    document.getElementById("page-description").textContent = manifest.description || "";
+    renderToc(sections);
+
+    if (!sections.length) {
+      root.innerHTML = '<div class="empty">No groups in manifest. Check config and rebuild.</div>';
+    } else {
+      sections.forEach((section) => root.appendChild(renderSection(section)));
+    }
+
+    function renderToc(sectionsList) {
+      if (!Array.isArray(sectionsList) || sectionsList.length === 0) {
+        toc.style.display = "none";
+        return;
+      }
+      toc.style.display = "grid";
+      toc.innerHTML = "";
+
+      const title = document.createElement("p");
+      title.className = "toc-title";
+      title.textContent = "Table of contents";
+      toc.appendChild(title);
+
+      const links = document.createElement("div");
+      links.className = "toc-links";
+      sectionsList.forEach((section) => {
+        const link = document.createElement("a");
+        link.className = "toc-link";
+        link.href = `#${sectionDomId(section.id)}`;
+        link.textContent = section.title || section.id;
+        links.appendChild(link);
+      });
+      toc.appendChild(links);
+    }
+
+    function renderSection(section) {
+      const state = {
+        groupIndex: 0,
+        label: manifest.default_label || "label_00",
+        sampleIndex: 0
+      };
+
+      const wrap = document.createElement("section");
+      wrap.className = "section";
+      wrap.id = sectionDomId(section.id);
+
+      const header = document.createElement("div");
+      header.className = "section-header";
+      header.innerHTML = `
+        <h2>${escapeHtml(section.title)}</h2>
+        <p class="section-text">${escapeHtml(section.text || "Write section text in config: sections[].text")}</p>
+      `;
+      wrap.appendChild(header);
+
+      const groupPanel = document.createElement("div");
+      groupPanel.className = "panel";
+      groupPanel.innerHTML = `
+        <div class="row">
+          <div>
+            <div class="tiny" style="margin-bottom:8px">Subgroup</div>
+            <div class="tabs" data-el="group-tabs"></div>
+          </div>
+          <div class="meta" data-el="group-meta"></div>
+        </div>
+      `;
+      wrap.appendChild(groupPanel);
+
+      const labelPanel = document.createElement("div");
+      labelPanel.className = "panel";
+      labelPanel.innerHTML = `
+        <div class="tiny" style="margin-bottom:8px">Label</div>
+        <div class="label-row">
+          <div class="label-hint">Switch generated label &#8594;</div>
+          <div class="label-tabs" data-el="label-tabs"></div>
+        </div>
+      `;
+      wrap.appendChild(labelPanel);
+
+      const samplePanel = document.createElement("div");
+      samplePanel.className = "panel";
+      samplePanel.innerHTML = `
+        <div class="tiny" style="margin-bottom:8px">Sample</div>
+        <div class="sample-nav">
+          <button title="Previous sample" data-el="prev-sample">&#8592;</button>
+          <select aria-label="Sample selector" data-el="sample-select"></select>
+          <button title="Next sample" data-el="next-sample">&#8594;</button>
+          <div class="meta" data-el="sample-meta"></div>
+        </div>
+      `;
+      wrap.appendChild(samplePanel);
+
+      const models = document.createElement("main");
+      models.className = "models";
+      wrap.appendChild(models);
+
+      const els = {
+        groupPanel,
+        labelPanel,
+        groupTabs: groupPanel.querySelector('[data-el="group-tabs"]'),
+        groupMeta: groupPanel.querySelector('[data-el="group-meta"]'),
+        prevSample: samplePanel.querySelector('[data-el="prev-sample"]'),
+        nextSample: samplePanel.querySelector('[data-el="next-sample"]'),
+        sampleSelect: samplePanel.querySelector('[data-el="sample-select"]'),
+        sampleMeta: samplePanel.querySelector('[data-el="sample-meta"]'),
+        labelTabs: labelPanel.querySelector('[data-el="label-tabs"]'),
+        models
+      };
+
+      function sectionGroups() {
+        return section.groups || [];
+      }
+
+      function currentGroup() {
+        const groups = sectionGroups();
+        if (!groups.length) return null;
+        if (state.groupIndex < 0) state.groupIndex = 0;
+        if (state.groupIndex >= groups.length) state.groupIndex = groups.length - 1;
+        return groups[state.groupIndex];
+      }
+
+      function currentLabelOptions() {
+        const group = currentGroup();
+        if (!group) return [];
+
+        const labels = new Set();
+        (group.models || []).forEach((model) => {
+          const gamma = model.selected_gamma;
+          const labelMap = (model.gammas || {})[gamma] || {};
+          Object.keys(labelMap).forEach((label) => labels.add(label));
+        });
+
+        return Array.from(labels).sort(naturalCompare);
+      }
+
+      function ensureValidLabel() {
+        const labels = currentLabelOptions();
+        if (!labels.length) {
+          state.label = "";
+          state.sampleIndex = 0;
+          return;
+        }
+
+        if (!labels.includes(state.label)) {
+          const defaultLabel = manifest.default_label;
+          state.label = labels.includes(defaultLabel) ? defaultLabel : labels[0];
+          state.sampleIndex = 0;
+        }
+      }
+
+      function currentSamples() {
+        const group = currentGroup();
+        if (!group || !state.label) return [];
+
+        const models = group.models || [];
+        let longest = [];
+        for (const model of models) {
+          const gamma = model.selected_gamma;
+          const labelMap = (((model.gammas || {})[gamma] || {})[state.label]) || {};
+          const ordered = Object.keys(labelMap);
+          if (ordered.length > longest.length) {
+            longest = ordered;
+          }
+        }
+        return longest;
+      }
+
+      function currentSampleName() {
+        const samples = currentSamples();
+        if (!samples.length) return null;
+        if (state.sampleIndex < 0) state.sampleIndex = 0;
+        if (state.sampleIndex >= samples.length) state.sampleIndex = samples.length - 1;
+        return samples[state.sampleIndex];
+      }
+
+      function renderGroupTabs() {
+        const groups = sectionGroups();
+        els.groupTabs.innerHTML = "";
+        els.groupPanel.style.display = groups.length > 1 ? "block" : "none";
+
+        groups.forEach((group, idx) => {
+          const btn = document.createElement("button");
+          btn.textContent = group.title || group.id;
+          btn.className = idx === state.groupIndex ? "active" : "";
+          btn.onclick = () => {
+            state.groupIndex = idx;
+            state.sampleIndex = 0;
+            ensureValidLabel();
+            render();
+          };
+          els.groupTabs.appendChild(btn);
+        });
+      }
+
+      function renderLabelTabs() {
+        ensureValidLabel();
+        const labels = currentLabelOptions();
+        const showLabels = labels.length > 1;
+        els.labelPanel.style.display = showLabels ? "block" : "none";
+
+        els.labelTabs.innerHTML = "";
+        labels.forEach((label) => {
+          const n = Number(String(label).replace("label_", ""));
+          const btn = document.createElement("button");
+          btn.textContent = Number.isNaN(n) ? label.replace("label_", "") : String(n);
+          btn.className = label === state.label ? "active" : "";
+          btn.onclick = () => {
+            state.label = label;
+            state.sampleIndex = 0;
+            render();
+          };
+          els.labelTabs.appendChild(btn);
+        });
+      }
+
+      function renderSampleControls() {
+        const samples = currentSamples();
+        const sampleName = currentSampleName();
+
+        els.sampleSelect.innerHTML = "";
+        samples.forEach((name, idx) => {
+          const option = document.createElement("option");
+          option.value = String(idx);
+          option.textContent = genericSampleName(idx);
+          option.title = name;
+          if (idx === state.sampleIndex) option.selected = true;
+          els.sampleSelect.appendChild(option);
+        });
+
+        els.sampleSelect.onchange = (event) => {
+          state.sampleIndex = Number(event.target.value);
+          renderModels();
+          renderMeta();
+        };
+
+        els.prevSample.disabled = samples.length === 0 || state.sampleIndex === 0;
+        els.nextSample.disabled = samples.length === 0 || state.sampleIndex >= samples.length - 1;
+
+        els.prevSample.onclick = () => {
+          if (state.sampleIndex > 0) {
+            state.sampleIndex -= 1;
+            render();
+          }
+        };
+
+        els.nextSample.onclick = () => {
+          if (state.sampleIndex < samples.length - 1) {
+            state.sampleIndex += 1;
+            render();
+          }
+        };
+
+        els.sampleMeta.textContent = sampleName
+          ? `${state.sampleIndex + 1} / ${samples.length}`
+          : "No samples for this setting";
+      }
+
+      function renderMeta() {
+        const group = currentGroup();
+        const modelCount = group && Array.isArray(group.models) ? group.models.length : 0;
+        els.groupMeta.textContent = `${modelCount} models`;
+      }
+
+      function renderModels() {
+        const group = currentGroup();
+        const sampleName = currentSampleName();
+        els.models.innerHTML = "";
+
+        if (!group || !Array.isArray(group.models) || !group.models.length) {
+          els.models.innerHTML = '<div class="empty">No models found in this section.</div>';
+          return;
+        }
+
+        for (const model of group.models) {
+          const gamma = model.selected_gamma;
+          const labelMap = (((model.gammas || {})[gamma] || {})[state.label]) || {};
+          const modelSampleNames = Object.keys(labelMap);
+          const modelSampleName = modelSampleNames[state.sampleIndex] || null;
+          const url = modelSampleName ? labelMap[modelSampleName] : null;
+          const spectrogramLabelMap = (((model.spectrograms || {})[gamma] || {})[state.label]) || {};
+          const spectrogramUrl = modelSampleName ? spectrogramLabelMap[modelSampleName] : null;
+
+          const card = document.createElement("article");
+          card.className = "card";
+
+          const title = document.createElement("h3");
+          title.textContent = model.title || model.id;
+          card.appendChild(title);
+
+          if (model.sample_source_url) {
+            const sourceNote = document.createElement("div");
+            sourceNote.className = "tiny source-note";
+            const sourceText = model.sample_source_text || "Samples source";
+            sourceNote.innerHTML = `${escapeHtml(sourceText)} <a class="source-link" href="${escapeHtml(model.sample_source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(model.sample_source_url)}</a>`;
+            card.appendChild(sourceNote);
+          }
+
+          let audio = null;
+
+          if (url) {
+            audio = document.createElement("audio");
+            audio.controls = true;
+            audio.preload = "none";
+            audio.src = url;
+          } else {
+            const missing = document.createElement("div");
+            missing.className = "missing";
+            missing.textContent = "Sample missing for current model / label.";
+            card.appendChild(missing);
+          }
+
+          if (spectrogramUrl) {
+            const specWrap = document.createElement("div");
+            specWrap.className = "spectrogram-wrap";
+
+            const specStage = document.createElement("div");
+            specStage.className = "spectrogram-stage";
+
+            const specImg = document.createElement("img");
+            specImg.className = "spectrogram-img";
+            specImg.loading = "lazy";
+            specImg.alt = "Spectrogram";
+            specImg.src = spectrogramUrl;
+
+            const specCursor = document.createElement("div");
+            specCursor.className = "spectrogram-cursor";
+
+            specStage.appendChild(specImg);
+            specStage.appendChild(specCursor);
+            specWrap.appendChild(specStage);
+
+            const specSlider = document.createElement("input");
+            specSlider.className = "spectrogram-slider";
+            specSlider.type = "range";
+            specSlider.min = "0";
+            specSlider.max = "1000";
+            specSlider.step = "1";
+            specSlider.value = "0";
+            specSlider.disabled = !audio;
+            specWrap.appendChild(specSlider);
+
+            const setProgress = (fraction) => {
+              const clamped = Math.min(1, Math.max(0, Number(fraction) || 0));
+              specCursor.style.left = `${(clamped * 100).toFixed(3)}%`;
+              specSlider.value = String(Math.round(clamped * 1000));
+            };
+            setProgress(0);
+
+            if (audio) {
+              const syncFromAudio = () => {
+                if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+                setProgress(audio.currentTime / audio.duration);
+              };
+
+              const seekByFraction = (fraction) => {
+                if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+                audio.currentTime = Math.min(1, Math.max(0, fraction)) * audio.duration;
+                syncFromAudio();
+              };
+
+              audio.addEventListener("loadedmetadata", syncFromAudio);
+              audio.addEventListener("timeupdate", syncFromAudio);
+              audio.addEventListener("seeked", syncFromAudio);
+
+              specSlider.addEventListener("input", () => {
+                const fraction = Number(specSlider.value) / 1000;
+                seekByFraction(fraction);
+              });
+
+              specStage.addEventListener("click", (event) => {
+                const rect = specStage.getBoundingClientRect();
+                if (rect.width <= 0) return;
+                const fraction = (event.clientX - rect.left) / rect.width;
+                seekByFraction(fraction);
+              });
+            }
+
+            card.appendChild(specWrap);
+          } else if (spectrogramsEnabled) {
+            const specMissing = document.createElement("div");
+            specMissing.className = "tiny";
+            specMissing.textContent = "Spectrogram is missing for this sample.";
+            card.appendChild(specMissing);
+          }
+
+          if (audio) {
+            card.appendChild(audio);
+          }
+
+          els.models.appendChild(card);
+        }
+      }
+
+      function render() {
+        renderGroupTabs();
+        renderLabelTabs();
+        renderSampleControls();
+        renderMeta();
+        renderModels();
+      }
+
+      wrap.addEventListener("keydown", (event) => {
+        if (event.target && ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
+
+        if (event.key === "ArrowLeft") {
+          if (state.sampleIndex > 0) {
+            state.sampleIndex -= 1;
+            render();
+          }
+        } else if (event.key === "ArrowRight") {
+          const samples = currentSamples();
+          if (state.sampleIndex < samples.length - 1) {
+            state.sampleIndex += 1;
+            render();
+          }
+        } else if (/^[0-9]$/.test(event.key)) {
+          const labels = currentLabelOptions();
+          const next = `label_${event.key.padStart(2, "0")}`;
+          if (labels.includes(next)) {
+            state.label = next;
+            state.sampleIndex = 0;
+            render();
+          }
+        }
+      });
+
+      wrap.tabIndex = 0;
+      render();
+      return wrap;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
 </body>
 </html>
