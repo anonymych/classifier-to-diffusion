@@ -17,6 +17,7 @@
       --danger: #b34b43;
       --radius: 14px;
       --shadow: 0 10px 24px rgba(24, 34, 54, 0.08);
+      --spectrogram-aspect-ratio: 7 / 3.2;
     }
 
     * { box-sizing: border-box; }
@@ -75,7 +76,11 @@
       color: var(--muted);
     }
 
-    .sub { margin: 0; }
+    .sub {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.55;
+    }
 
     .sections-root {
       display: grid;
@@ -91,6 +96,10 @@
       border-radius: var(--radius);
       background: linear-gradient(180deg, #fbfcff, #f7f9fd);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 14px rgba(24, 34, 54, 0.05);
+    }
+
+    .section-lock-scroll {
+      overflow-anchor: none;
     }
 
     .section-header {
@@ -140,9 +149,37 @@
 
     .sample-nav {
       display: grid;
-      grid-template-columns: auto minmax(220px, 360px) auto auto;
+      grid-template-columns: auto minmax(220px, 360px) auto auto auto minmax(340px, 520px);
       align-items: center;
       gap: 10px;
+    }
+
+    .sample-separator {
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .section-colorbar {
+      display: flex;
+      justify-content: flex-end;
+      min-width: 340px;
+    }
+
+    .section-colorbar-inner {
+      display: grid;
+      justify-items: end;
+      gap: 0;
+    }
+
+    .section-colorbar-img {
+      display: block;
+      width: min(460px, 100%);
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
     }
 
     button,
@@ -214,12 +251,15 @@
       position: relative;
       line-height: 0;
       cursor: pointer;
+      aspect-ratio: var(--spectrogram-aspect-ratio);
+      background: #f8f9fc;
     }
 
     .spectrogram-img {
       width: 100%;
       display: block;
-      height: auto;
+      height: 100%;
+      object-fit: contain;
     }
 
     .spectrogram-cursor {
@@ -328,6 +368,19 @@
       .sample-nav .meta {
         grid-column: 1 / -1;
       }
+
+      .sample-separator {
+        display: none;
+      }
+
+      .section-colorbar {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+
+      .section-colorbar-inner {
+        justify-items: start;
+      }
     }
   </style>
 </head>
@@ -338,7 +391,7 @@
         <h1 id="page-title">Audio Examples</h1>
         <p class="sub" id="page-description">Side-by-side comparison of generated audio samples.</p>
         <p class="tiny" style="margin:8px 0 0">
-          Keyboard inside hovered section: <span class="kbd">&#8592;</span>/<span class="kbd">&#8594;</span> sample, <span class="kbd">0-9</span> label.
+          Use keyboard keys inside each section to switch: <span class="kbd">&#8592;</span>/<span class="kbd">&#8594;</span> sample, <span class="kbd">0-9</span> label.
         </p>
       </header>
       <nav class="toc" id="toc"></nav>
@@ -349,7 +402,7 @@
   <script id="manifest-data" type="application/json">__AUDIO_EXAMPLES_MANIFEST_START__
 {
   "site_title": "Repurposing a Speech Classifier for Guided Diffusion-Based Speech Generation: audio examples.",
-  "description": "This page presents audio examples generated on the Speech Commands 09 benchmark: one-second spoken digit recordings sampled at 16 kHz. The main comparisons focus on two model families — a standard U-Net baseline and our proposed classifier-based diffusion model with Score Subnet adaptation, shown in two variants. The sections below cover both the main results and data-restricted ablations, allowing direct side-by-side comparison across aligned samples, labels, and training regimes.",
+  "description": "This page presents audio examples generated on the Speech Commands 09 benchmark: one-second spoken digit recordings sampled at 16 kHz. The main comparisons focus on two model families -- a standard U-Net baseline and our proposed classifier-based diffusion model - a Score Subnet, shown in two variants. The sections below present audio examples across three regimes: unconditional generation, classifier-guided conditional generation, and conditional generation within a zero-shot/low-data training. Spectrograms are normalized in dB separately for each section by using one shared section maximum and the same fixed dynamic range = 120 dB, and in each section colorbar shows the dB range.",
   "default_label": "label_00",
   "labels": [
     "label_00",
@@ -367,15 +420,39 @@
     "enabled": true,
     "output_subdir": "spectrograms",
     "format": "png",
+    "figsize": [
+      7.0,
+      3.2
+    ],
     "workers": 10,
     "normalize_max_db_per_section": true,
-    "normalize_dynamic_range_db": 120.0
+    "normalize_dynamic_range_db": 120.0,
+    "section_colorbars": {
+      "unconditional-generation": {
+        "image": "spectrograms/_section_colorbars/unconditional-generation.png",
+        "vmin_db": -132.61979926363784,
+        "vmax_db": -12.619799263637844,
+        "style_version": 2
+      },
+      "conditional-generation": {
+        "image": "spectrograms/_section_colorbars/conditional-generation.png",
+        "vmin_db": -132.35807424983233,
+        "vmax_db": -12.358074249832342,
+        "style_version": 2
+      },
+      "low-data-ablation": {
+        "image": "spectrograms/_section_colorbars/low-data-ablation.png",
+        "vmin_db": -127.34039818154538,
+        "vmax_db": -7.340398181545385,
+        "style_version": 2
+      }
+    }
   },
   "sections": [
     {
       "id": "unconditional-generation",
       "title": "Unconditional Generation",
-      "text": "This section compares unconditional generation quality across the main models. In addition to the U-Net baseline and the proposed Score Subnet model variants, we include three open-source reference models to place the results in a broader context. Since no target label is provided, the comparison highlights overall realism, intelligibility and artifacts.",
+      "text": "This section compares unconditional generation quality across 6 models. In addition to the U-Net baseline and the proposed Score Subnet model variants, we include three open-source reference models to place the results in a broader context. Since no target label is provided, the comparison highlights overall realism, intelligibility and artifacts.",
       "groups": [
         "unconditional-generation"
       ]
@@ -383,9 +460,19 @@
     {
       "id": "conditional-generation",
       "title": "Conditional Generation",
-      "text": "Here, models are guided toward a target spoken digit. By switching labels and samples, you can compare how well each method follows class information while preserving perceptual quality.",
+      "text": "For conditional generation, we use classifier-guided sampling with the same classifier for all models. Our Score Subnet approach is trained on this classifier and then reused during sampling, whereas the U-Net baseline uses the classifier only at sampling time. All examples on this page are generated with guidance parameter γ = 3.0. You can switch the target label and browse individual samples for each label (up to 5 samples per label).",
       "groups": [
         "conditional-generation"
+      ]
+    },
+    {
+      "id": "low-data-ablation",
+      "title": "Low Data Ablation",
+      "text": "In this section, we evaluate our generative models when trained on three restricted subsets: 3% of the full training set, labels {3, 5, 7} only, and label {4} only. The generative model, either U-Net or Score Subnet, is trained on these restricted data regimes, while the classifier is trained on the full label set. Since we use exactly the same noise seeds across models during sampling, the generated outputs can be compared very closely, sample by sample. We use γ = 300.0 for the restricted-label settings {3, 5, 7} and {4}, and γ = 3.0 for the 3% training-set setting. Under these conditions Score Subnet demonstrates stronger generalization ability to unseen labels.",
+      "groups": [
+        "labels-3-5-7",
+        "label-4-only",
+        "train-3pct"
       ]
     }
   ],
@@ -1128,6 +1215,1068 @@
           }
         }
       ]
+    },
+    {
+      "id": "labels-3-5-7",
+      "title": "Only labels 3, 5, 7",
+      "text": "",
+      "section_id": "low-data-ablation",
+      "section_title": "Low Data Ablation",
+      "models": [
+        {
+          "id": "model-a",
+          "title": "U-Net + Classifier",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_00/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_00/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_01/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_01/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_02/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_02/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_03/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_03/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_04/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_04/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_05/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_05/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_06/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_06/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_07/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_07/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_08/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_08/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/labels-3-5-7/model-a/label_09/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-a/label_09/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-a/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-a/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-a/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-a/label_09/audio_002.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-b",
+          "title": "Score Subnet",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_00/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_00/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_01/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_01/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_02/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_02/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_03/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_03/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_04/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_04/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_05/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_05/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_06/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_06/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_07/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_07/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_08/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_08/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/labels-3-5-7/model-b/label_09/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-b/label_09/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-b/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-b/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-b/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-b/label_09/audio_002.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-c",
+          "title": "Score Subnet -> no gradient taps",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_00/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_00/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_01/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_01/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_02/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_02/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_03/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_03/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_04/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_04/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_05/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_05/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_06/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_06/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_07/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_07/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_08/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_08/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/labels-3-5-7/model-c/label_09/audio_000.wav",
+                "audio_001.wav": "audio/labels-3-5-7/model-c/label_09/audio_001.wav",
+                "audio_002.wav": "audio/labels-3-5-7/model-c/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/labels-3-5-7/model-c/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/labels-3-5-7/model-c/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/labels-3-5-7/model-c/label_09/audio_002.png"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "label-4-only",
+      "title": "Only label 4",
+      "text": "",
+      "section_id": "low-data-ablation",
+      "section_title": "Low Data Ablation",
+      "models": [
+        {
+          "id": "model-a",
+          "title": "U-Net + Classifier",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_00/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_00/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_01/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_01/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_02/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_02/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_03/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_03/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_04/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_04/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_05/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_05/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_06/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_06/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_07/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_07/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_08/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_08/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/label-4-only/model-a/label_09/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-a/label_09/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-a/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/label-4-only/model-a/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-a/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-a/label_09/audio_002.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-b",
+          "title": "Score Subnet",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_00/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_00/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_01/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_01/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_02/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_02/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_03/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_03/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_04/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_04/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_05/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_05/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_06/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_06/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_07/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_07/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_08/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_08/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/label-4-only/model-b/label_09/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-b/label_09/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-b/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/label-4-only/model-b/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-b/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-b/label_09/audio_002.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-c",
+          "title": "Score Subnet -> no gradient taps",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_00/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_00/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_01/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_01/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_02/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_02/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_03/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_03/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_04/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_04/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_05/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_05/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_06/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_06/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_07/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_07/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_08/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_08/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/label-4-only/model-c/label_09/audio_000.wav",
+                "audio_001.wav": "audio/label-4-only/model-c/label_09/audio_001.wav",
+                "audio_002.wav": "audio/label-4-only/model-c/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/label-4-only/model-c/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/label-4-only/model-c/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/label-4-only/model-c/label_09/audio_002.png"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "train-3pct",
+      "title": "3% train set",
+      "text": "",
+      "section_id": "low-data-ablation",
+      "section_title": "Low Data Ablation",
+      "models": [
+        {
+          "id": "model-a",
+          "title": "U-Net + Classifier",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_00/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_00/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_01/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_01/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_02/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_02/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_03/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_03/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_04/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_04/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_05/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_05/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_06/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_06/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_07/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_07/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_08/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_08/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/train-3pct/model-a/label_09/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-a/label_09/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-a/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/train-3pct/model-a/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-a/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-a/label_09/audio_002.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-b",
+          "title": "Score Subnet",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_00/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_00/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_01/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_01/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_02/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_02/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_03/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_03/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_04/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_04/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_05/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_05/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_06/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_06/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_07/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_07/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_08/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_08/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/train-3pct/model-b/label_09/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-b/label_09/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-b/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/train-3pct/model-b/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-b/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-b/label_09/audio_002.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-c",
+          "title": "Score Subnet no gradient taps",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_00/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_00/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_00/audio_002.wav"
+              },
+              "label_01": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_01/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_01/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_01/audio_002.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_02/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_02/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_02/audio_002.wav"
+              },
+              "label_03": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_03/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_03/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_03/audio_002.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_04/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_04/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_04/audio_002.wav"
+              },
+              "label_05": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_05/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_05/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_05/audio_002.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_06/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_06/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_06/audio_002.wav"
+              },
+              "label_07": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_07/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_07/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_07/audio_002.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_08/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_08/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_08/audio_002.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/train-3pct/model-c/label_09/audio_000.wav",
+                "audio_001.wav": "audio/train-3pct/model-c/label_09/audio_001.wav",
+                "audio_002.wav": "audio/train-3pct/model-c/label_09/audio_002.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_00": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_00/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_00/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_00/audio_002.png"
+              },
+              "label_01": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_01/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_01/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_01/audio_002.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_02/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_02/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_02/audio_002.png"
+              },
+              "label_03": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_03/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_03/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_03/audio_002.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_04/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_04/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_04/audio_002.png"
+              },
+              "label_05": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_05/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_05/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_05/audio_002.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_06/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_06/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_06/audio_002.png"
+              },
+              "label_07": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_07/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_07/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_07/audio_002.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_08/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_08/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_08/audio_002.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/train-3pct/model-c/label_09/audio_000.png",
+                "audio_001.wav": "spectrograms/train-3pct/model-c/label_09/audio_001.png",
+                "audio_002.wav": "spectrograms/train-3pct/model-c/label_09/audio_002.png"
+              }
+            }
+          }
+        }
+      ]
     }
   ]
 }
@@ -1151,6 +2300,7 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
     const root = document.getElementById("sections-root");
     const toc = document.getElementById("toc");
     const spectrogramsEnabled = !!(manifest && manifest.spectrograms && manifest.spectrograms.enabled);
+    const sectionColorbars = (manifest && manifest.spectrograms && manifest.spectrograms.section_colorbars) || {};
 
     if (!manifest) {
       root.innerHTML = '<div class="empty">Manifest is missing. Rebuild the page.</div>';
@@ -1188,6 +2338,12 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
     }
 
     const sections = buildSections();
+    if (manifest && manifest.spectrograms && Array.isArray(manifest.spectrograms.figsize) && manifest.spectrograms.figsize.length === 2) {
+      const [fw, fh] = manifest.spectrograms.figsize;
+      if (Number(fw) > 0 && Number(fh) > 0) {
+        document.documentElement.style.setProperty("--spectrogram-aspect-ratio", `${Number(fw)} / ${Number(fh)}`);
+      }
+    }
     document.getElementById("page-title").textContent = manifest.site_title || "Audio Examples";
     document.getElementById("page-description").textContent = manifest.description || "";
     renderToc(sections);
@@ -1229,10 +2385,14 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         label: manifest.default_label || "label_00",
         sampleIndex: 0
       };
+      const keepScrollOnSampleChange = section.id === "low-data-ablation";
 
       const wrap = document.createElement("section");
       wrap.className = "section";
       wrap.id = sectionDomId(section.id);
+      if (keepScrollOnSampleChange) {
+        wrap.classList.add("section-lock-scroll");
+      }
 
       const header = document.createElement("div");
       header.className = "section-header";
@@ -1247,7 +2407,7 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
       groupPanel.innerHTML = `
         <div class="row">
           <div>
-            <div class="tiny" style="margin-bottom:8px">Subgroup</div>
+            <div class="tiny" style="margin-bottom:8px">Training set</div>
             <div class="tabs" data-el="group-tabs"></div>
           </div>
           <div class="meta" data-el="group-meta"></div>
@@ -1275,6 +2435,8 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
           <select aria-label="Sample selector" data-el="sample-select"></select>
           <button title="Next sample" data-el="next-sample">&#8594;</button>
           <div class="meta" data-el="sample-meta"></div>
+          <div class="sample-separator" data-el="sample-sep">|</div>
+          <div class="section-colorbar" data-el="section-colorbar"></div>
         </div>
       `;
       wrap.appendChild(samplePanel);
@@ -1292,6 +2454,8 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         nextSample: samplePanel.querySelector('[data-el="next-sample"]'),
         sampleSelect: samplePanel.querySelector('[data-el="sample-select"]'),
         sampleMeta: samplePanel.querySelector('[data-el="sample-meta"]'),
+        sampleSep: samplePanel.querySelector('[data-el="sample-sep"]'),
+        sectionColorbar: samplePanel.querySelector('[data-el="section-colorbar"]'),
         labelTabs: labelPanel.querySelector('[data-el="label-tabs"]'),
         models
       };
@@ -1418,8 +2582,11 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
 
         els.sampleSelect.onchange = (event) => {
           state.sampleIndex = Number(event.target.value);
-          renderModels();
-          renderMeta();
+          renderWithStableViewport(() => {
+            renderSampleControls();
+            renderModels();
+            renderMeta();
+          });
         };
 
         els.prevSample.disabled = samples.length === 0 || state.sampleIndex === 0;
@@ -1428,14 +2595,22 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         els.prevSample.onclick = () => {
           if (state.sampleIndex > 0) {
             state.sampleIndex -= 1;
-            render();
+            renderWithStableViewport(() => {
+              renderSampleControls();
+              renderMeta();
+              renderModels();
+            });
           }
         };
 
         els.nextSample.onclick = () => {
           if (state.sampleIndex < samples.length - 1) {
             state.sampleIndex += 1;
-            render();
+            renderWithStableViewport(() => {
+              renderSampleControls();
+              renderMeta();
+              renderModels();
+            });
           }
         };
 
@@ -1448,6 +2623,27 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         const group = currentGroup();
         const modelCount = group && Array.isArray(group.models) ? group.models.length : 0;
         els.groupMeta.textContent = `${modelCount} models`;
+      }
+
+      function renderSectionColorbar() {
+        const info = sectionColorbars[section.id];
+        const hasColorbar = !!(spectrogramsEnabled && info && info.image);
+        els.sampleSep.style.display = hasColorbar ? "block" : "none";
+        els.sectionColorbar.style.display = hasColorbar ? "flex" : "none";
+        els.sectionColorbar.innerHTML = "";
+        if (!hasColorbar) return;
+
+        const inner = document.createElement("div");
+        inner.className = "section-colorbar-inner";
+
+        const img = document.createElement("img");
+        img.className = "section-colorbar-img";
+        img.loading = "lazy";
+        img.alt = "dB color scale";
+        img.src = info.image;
+        inner.appendChild(img);
+
+        els.sectionColorbar.appendChild(inner);
       }
 
       function renderModels() {
@@ -1584,8 +2780,32 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         renderGroupTabs();
         renderLabelTabs();
         renderSampleControls();
+        renderSectionColorbar();
         renderMeta();
         renderModels();
+      }
+
+      function renderWithStableViewport(renderFn) {
+        if (!keepScrollOnSampleChange) {
+          renderFn();
+          return;
+        }
+
+        const anchorEl = samplePanel;
+        const beforeTop = anchorEl.getBoundingClientRect().top;
+        const adjustScroll = () => {
+          const afterTop = anchorEl.getBoundingClientRect().top;
+          const delta = afterTop - beforeTop;
+          if (Math.abs(delta) > 0.5) {
+            window.scrollTo(0, window.scrollY + delta);
+          }
+        };
+        renderFn();
+        adjustScroll();
+        requestAnimationFrame(() => {
+          adjustScroll();
+          requestAnimationFrame(adjustScroll);
+        });
       }
 
       wrap.addEventListener("keydown", (event) => {
@@ -1594,13 +2814,21 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         if (event.key === "ArrowLeft") {
           if (state.sampleIndex > 0) {
             state.sampleIndex -= 1;
-            render();
+            renderWithStableViewport(() => {
+              renderSampleControls();
+              renderMeta();
+              renderModels();
+            });
           }
         } else if (event.key === "ArrowRight") {
           const samples = currentSamples();
           if (state.sampleIndex < samples.length - 1) {
             state.sampleIndex += 1;
-            render();
+            renderWithStableViewport(() => {
+              renderSampleControls();
+              renderMeta();
+              renderModels();
+            });
           }
         } else if (/^[0-9]$/.test(event.key)) {
           const labels = currentLabelOptions();

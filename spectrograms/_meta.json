@@ -33,13 +33,37 @@
     "enabled": true,
     "sections": {
       "conditional-generation": {
-        "signature": "426f8d0c7d5e821d3ede3cbb559226cdd14c91f7882d1958c190faa2496e2b0d",
-        "max_db": -10.336155609699238
+        "signature": "39fe209d62cfb92148ee34c380b6966909e13de26254d3a7259bfdaa22626ed6",
+        "max_db": -12.358074249832342
+      },
+      "low-data-ablation": {
+        "signature": "be7245a390c55554d0747411bff415ea32d5fc1e001636bccb4247fa26fd6ca2",
+        "max_db": -7.340398181545385
       },
       "unconditional-generation": {
         "signature": "36e448e00f3a6b3441b288aad1452f755731f7a5f841f63bc26a80639c464bfa",
         "max_db": -12.619799263637844
       }
+    }
+  },
+  "section_colorbars": {
+    "conditional-generation": {
+      "image": "spectrograms/_section_colorbars/conditional-generation.png",
+      "vmin_db": -132.35807424983233,
+      "vmax_db": -12.358074249832342,
+      "style_version": 2
+    },
+    "low-data-ablation": {
+      "image": "spectrograms/_section_colorbars/low-data-ablation.png",
+      "vmin_db": -127.34039818154538,
+      "vmax_db": -7.340398181545385,
+      "style_version": 2
+    },
+    "unconditional-generation": {
+      "image": "spectrograms/_section_colorbars/unconditional-generation.png",
+      "vmin_db": -132.61979926363784,
+      "vmax_db": -12.619799263637844,
+      "style_version": 2
     }
   }
 }
