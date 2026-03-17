@@ -37,7 +37,7 @@
         "max_db": -12.358074249832342
       },
       "low-data-ablation": {
-        "signature": "be7245a390c55554d0747411bff415ea32d5fc1e001636bccb4247fa26fd6ca2",
+        "signature": "499c219e15e1b92712bef57001fdc05c2ed7e645bc6bcfa2c14d51cdf8b1e970",
         "max_db": -7.340398181545385
       },
       "unconditional-generation": {

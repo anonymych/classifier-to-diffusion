@@ -98,6 +98,18 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 14px rgba(24, 34, 54, 0.05);
     }
 
+    .section.section-has-preview {
+      gap: 4px;
+    }
+
+    .section.section-has-preview .section-header {
+      padding-bottom: 0;
+    }
+
+    .section.section-has-preview .ablation-preview-panel {
+      padding-top: 0;
+    }
+
     .section-lock-scroll {
       overflow-anchor: none;
     }
@@ -111,6 +123,55 @@
     .section-text {
       margin: 0;
       white-space: pre-wrap;
+    }
+
+    .text-separator-gap {
+      display: block;
+      height: 10px;
+    }
+
+    .section-expander {
+      border: 1px solid #d4dcec;
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .section-expander > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-bottom: 1px solid #d4dcec;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .section-expander > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .section-expander > summary::after {
+      content: "▸";
+      color: var(--accent);
+      font-size: 12px;
+      line-height: 1;
+      transition: transform 140ms ease;
+      transform-origin: 50% 50%;
+    }
+
+    .section-expander[open] > summary::after {
+      transform: rotate(90deg);
+    }
+
+    .section-expander-content {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
     }
 
     .panel {
@@ -214,6 +275,115 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
+    }
+
+    .all-samples-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .all-sample-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: var(--surface-soft);
+      display: grid;
+      gap: 8px;
+    }
+
+    .all-sample-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .all-sample-label {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .inline-label-badge {
+      vertical-align: baseline;
+    }
+
+    .all-sample-file {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .ablation-preview-panel {
+      --preview-scale: 1;
+      display: grid;
+      gap: calc(12px * var(--preview-scale));
+      padding: calc(12px * var(--preview-scale));
+    }
+
+    .ablation-preview-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .ablation-preview-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: calc(10px * var(--preview-scale));
+    }
+
+    .ablation-preview-example {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: calc(10px * var(--preview-scale));
+      display: grid;
+      gap: calc(8px * var(--preview-scale));
+    }
+
+    .ablation-preview-example-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ablation-preview-models {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: calc(8px * var(--preview-scale));
+    }
+
+    .ablation-preview-model {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: calc(8px * var(--preview-scale));
+      background: var(--surface-soft);
+      display: grid;
+      gap: calc(6px * var(--preview-scale));
+      min-width: 0;
+    }
+
+    .ablation-preview-model-title {
+      font-size: calc(15px * var(--preview-scale));
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .ablation-mid-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
     }
 
     .card {
@@ -381,6 +551,15 @@
       .section-colorbar-inner {
         justify-items: start;
       }
+
+      .ablation-preview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ablation-preview-models {
+        grid-template-columns: 1fr;
+      }
+
     }
   </style>
 </head>
@@ -402,7 +581,7 @@
   <script id="manifest-data" type="application/json">__AUDIO_EXAMPLES_MANIFEST_START__
 {
   "site_title": "Repurposing a Speech Classifier for Guided Diffusion-Based Speech Generation: audio examples.",
-  "description": "This page presents audio examples generated on the Speech Commands 09 benchmark: one-second spoken digit recordings sampled at 16 kHz. The main comparisons focus on two model families -- a standard U-Net baseline and our proposed classifier-based diffusion model - a Score Subnet, shown in two variants. The sections below present audio examples across three regimes: unconditional generation, classifier-guided conditional generation, and conditional generation within a zero-shot/low-data training. Spectrograms are normalized in dB separately for each section by using one shared section maximum and the same fixed dynamic range = 120 dB, and in each section colorbar shows the dB range.",
+  "description": "This page presents audio examples generated on the Speech Commands 09 benchmark: one-second spoken digit recordings sampled at 16 kHz. The main comparisons focus on two model families -- a standard U-Net baseline and our proposed classifier-based diffusion model - a Score Subnet, shown in two variants. The sections below present audio examples across three regimes: unconditional generation, classifier-guided conditional generation, and conditional generation within a zero-shot/low-data training. Spectrograms are normalized in dB separately for each section, using a shared maximum and a fixed dynamic range of 120 dB. The colorbar in each section shows the corresponding dB range.",
   "default_label": "label_00",
   "labels": [
     "label_00",
@@ -453,6 +632,10 @@
       "id": "unconditional-generation",
       "title": "Unconditional Generation",
       "text": "This section compares unconditional generation quality across 6 models. In addition to the U-Net baseline and the proposed Score Subnet model variants, we include three open-source reference models to place the results in a broader context. Since no target label is provided, the comparison highlights overall realism, intelligibility and artifacts.",
+      "expanded_text": "",
+      "preview_caption": "",
+      "preview_compact": false,
+      "preview_scale": 1.0,
       "groups": [
         "unconditional-generation"
       ]
@@ -461,15 +644,24 @@
       "id": "conditional-generation",
       "title": "Conditional Generation",
       "text": "For conditional generation, we use classifier-guided sampling with the same classifier for all models. Our Score Subnet approach is trained on this classifier and then reused during sampling, whereas the U-Net baseline uses the classifier only at sampling time. All examples on this page are generated with guidance parameter γ = 3.0. You can switch the target label and browse individual samples for each label (up to 5 samples per label).",
+      "expanded_text": "",
+      "preview_caption": "",
+      "preview_compact": false,
+      "preview_scale": 1.0,
       "groups": [
         "conditional-generation"
       ]
     },
     {
       "id": "low-data-ablation",
-      "title": "Low Data Ablation",
-      "text": "In this section, we evaluate our generative models when trained on three restricted subsets: 3% of the full training set, labels {3, 5, 7} only, and label {4} only. The generative model, either U-Net or Score Subnet, is trained on these restricted data regimes, while the classifier is trained on the full label set. Since we use exactly the same noise seeds across models during sampling, the generated outputs can be compared very closely, sample by sample. We use γ = 300.0 for the restricted-label settings {3, 5, 7} and {4}, and γ = 3.0 for the 3% training-set setting. Under these conditions Score Subnet demonstrates stronger generalization ability to unseen labels.",
+      "title": "Guidance Study in Low-Data Regimes",
+      "text": "One of the most interesting findings in our study comes from restricted training-data scenarios, where the compared methods differ most clearly in their ability to generalize beyond the seen labels. In this section we evaluate generative models trained on three limited subsets: **3% of the full training set (low amount of training data)**, and **labels {3, 5, 7} only or label {4} only (zero-shot training scenario)**, while **the classifier is always trained on the full label set {0, …, 9}**. \n---\nThe six preview examples shown here focus specifically on the zero-shot setting, where **the generative model is trained only on digits {3, 5, 7}.** We then perform a conditional generation of samples for {{label:labels}} that were unseen during training. This allows us to compare a standard Classifier Guidance pipeline, consisting of a U-Net generator and a separate classifier, against our Score Subnet approach. Since all models are sampled from exactly the same noise seeds, their outputs can be compared directly on a one-to-one basis. The guidance scale γ = 300.0 is used for the examples. Complete ablation examples covering all restricted training scenarios and all generated labels are available in the expanded section below. In this setting, Score Subnet shows noticeably stronger generalization to unseen labels.",
+      "expanded_text": "In this section, we evaluate our generative models when trained on **three restricted subsets: labels {3, 5, 7} only, label {4} only, and 3% of the full training set**. We use the guidance scale γ = 300.0 for the zero-shot training settings (labels {3, 5, 7} and label {4}), and γ = 3.0 for the 3% train set scenario. We present 3 samples per scenario and target label for each of the 3 models.",
+      "preview_caption": "Preview (6 examples):",
+      "preview_compact": false,
+      "preview_scale": 1.0,
       "groups": [
+        "ablation-preview-357",
         "labels-3-5-7",
         "label-4-only",
         "train-3pct"
@@ -1210,6 +1402,168 @@
                 "audio_002.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_002.png",
                 "audio_003.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_003.png",
                 "audio_004.wav": "spectrograms/conditional-generation/mine-model-c/label_09/audio_004.png"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ablation-preview-357",
+      "title": "Preview examples",
+      "text": "",
+      "section_id": "low-data-ablation",
+      "section_title": "Low Data Ablation",
+      "models": [
+        {
+          "id": "model-a",
+          "title": "U-Net + Classifier",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_01": {
+                "audio_000.wav": "audio/ablation-preview-357/model-a/label_01/audio_000.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/ablation-preview-357/model-a/label_02/audio_000.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/ablation-preview-357/model-a/label_04/audio_000.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/ablation-preview-357/model-a/label_06/audio_000.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/ablation-preview-357/model-a/label_08/audio_000.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/ablation-preview-357/model-a/label_09/audio_000.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_01": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-a/label_01/audio_000.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-a/label_02/audio_000.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-a/label_04/audio_000.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-a/label_06/audio_000.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-a/label_08/audio_000.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-a/label_09/audio_000.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-b",
+          "title": "Score Subnet",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_01": {
+                "audio_000.wav": "audio/ablation-preview-357/model-b/label_01/audio_000.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/ablation-preview-357/model-b/label_02/audio_000.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/ablation-preview-357/model-b/label_04/audio_000.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/ablation-preview-357/model-b/label_06/audio_000.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/ablation-preview-357/model-b/label_08/audio_000.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/ablation-preview-357/model-b/label_09/audio_000.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_01": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-b/label_01/audio_000.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-b/label_02/audio_000.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-b/label_04/audio_000.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-b/label_06/audio_000.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-b/label_08/audio_000.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-b/label_09/audio_000.png"
+              }
+            }
+          }
+        },
+        {
+          "id": "model-c",
+          "title": "Score Subnet -> no gradient taps",
+          "sample_source_text": "",
+          "sample_source_url": "",
+          "selected_gamma": "main",
+          "gammas": {
+            "main": {
+              "label_01": {
+                "audio_000.wav": "audio/ablation-preview-357/model-c/label_01/audio_000.wav"
+              },
+              "label_02": {
+                "audio_000.wav": "audio/ablation-preview-357/model-c/label_02/audio_000.wav"
+              },
+              "label_04": {
+                "audio_000.wav": "audio/ablation-preview-357/model-c/label_04/audio_000.wav"
+              },
+              "label_06": {
+                "audio_000.wav": "audio/ablation-preview-357/model-c/label_06/audio_000.wav"
+              },
+              "label_08": {
+                "audio_000.wav": "audio/ablation-preview-357/model-c/label_08/audio_000.wav"
+              },
+              "label_09": {
+                "audio_000.wav": "audio/ablation-preview-357/model-c/label_09/audio_000.wav"
+              }
+            }
+          },
+          "spectrograms": {
+            "main": {
+              "label_01": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-c/label_01/audio_000.png"
+              },
+              "label_02": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-c/label_02/audio_000.png"
+              },
+              "label_04": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-c/label_04/audio_000.png"
+              },
+              "label_06": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-c/label_06/audio_000.png"
+              },
+              "label_08": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-c/label_08/audio_000.png"
+              },
+              "label_09": {
+                "audio_000.wav": "spectrograms/ablation-preview-357/model-c/label_09/audio_000.png"
               }
             }
           }
@@ -2327,6 +2681,12 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
               id: section.id,
               title: section.title || section.id,
               text: section.text || "",
+              expanded_text: section.expanded_text || "",
+              preview_caption: section.preview_caption || "",
+              preview_compact: !!section.preview_compact,
+              preview_scale: Number.isFinite(Number(section.preview_scale))
+                ? Number(section.preview_scale)
+                : (!!section.preview_compact ? 0.88 : 1.0),
               groups
             };
           })
@@ -2385,7 +2745,16 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         label: manifest.default_label || "label_00",
         sampleIndex: 0
       };
-      const keepScrollOnSampleChange = section.id === "low-data-ablation";
+      const isLowDataSection = section.id === "low-data-ablation";
+      const previewGroupId = "ablation-preview-357";
+      const sectionGroupsAll = Array.isArray(section.groups) ? section.groups : [];
+      const previewGroup = isLowDataSection
+        ? sectionGroupsAll.find((group) => group && group.id === previewGroupId) || null
+        : null;
+      const interactiveGroups = isLowDataSection
+        ? sectionGroupsAll.filter((group) => group && group.id !== previewGroupId)
+        : sectionGroupsAll;
+      const keepScrollOnSampleChange = isLowDataSection;
 
       const wrap = document.createElement("section");
       wrap.className = "section";
@@ -2393,27 +2762,77 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
       if (keepScrollOnSampleChange) {
         wrap.classList.add("section-lock-scroll");
       }
+      if (previewGroup) {
+        wrap.classList.add("section-has-preview");
+      }
 
       const header = document.createElement("div");
       header.className = "section-header";
       header.innerHTML = `
         <h2>${escapeHtml(section.title)}</h2>
-        <p class="section-text">${escapeHtml(section.text || "Write section text in config: sections[].text")}</p>
+        <div class="section-text">${formatRichText(section.text || "Write section text in config: sections[].text")}</div>
       `;
       wrap.appendChild(header);
+
+      let sectionBody = wrap;
+      if (previewGroup) {
+        const previewPanel = document.createElement("div");
+        previewPanel.className = "ablation-preview-panel";
+        const previewScale = Math.min(1.5, Math.max(0.5, Number(section.preview_scale) || 1.0));
+        previewPanel.style.setProperty("--preview-scale", String(previewScale));
+
+        if (section.preview_caption) {
+          const previewNote = document.createElement("p");
+          previewNote.className = "ablation-preview-note";
+          previewNote.textContent = section.preview_caption;
+          previewPanel.appendChild(previewNote);
+        }
+
+        const previewGrid = document.createElement("div");
+        previewGrid.className = "ablation-preview-grid";
+        previewPanel.appendChild(previewGrid);
+        wrap.appendChild(previewPanel);
+      }
+
+      if (isLowDataSection) {
+        const midText = document.createElement("p");
+        midText.className = "ablation-mid-text";
+        midText.textContent = "Expand below to browse the full low-data regimes ablation examples by training subset, label, and sample.";
+        wrap.appendChild(midText);
+
+        const expander = document.createElement("details");
+        expander.className = "section-expander";
+        expander.open = false;
+
+        const summary = document.createElement("summary");
+        summary.textContent = "Full low-data regimes ablation";
+        expander.appendChild(summary);
+
+        const content = document.createElement("div");
+        content.className = "section-expander-content";
+        if (section.expanded_text) {
+          const expandedTextEl = document.createElement("div");
+          expandedTextEl.className = "section-text";
+          expandedTextEl.innerHTML = formatRichText(section.expanded_text);
+          content.appendChild(expandedTextEl);
+        }
+        expander.appendChild(content);
+        wrap.appendChild(expander);
+        sectionBody = content;
+      }
 
       const groupPanel = document.createElement("div");
       groupPanel.className = "panel";
       groupPanel.innerHTML = `
         <div class="row">
           <div>
-            <div class="tiny" style="margin-bottom:8px">Training set</div>
+            <div class="tiny" style="margin-bottom:8px">Generative model training set</div>
             <div class="tabs" data-el="group-tabs"></div>
           </div>
           <div class="meta" data-el="group-meta"></div>
         </div>
       `;
-      wrap.appendChild(groupPanel);
+      sectionBody.appendChild(groupPanel);
 
       const labelPanel = document.createElement("div");
       labelPanel.className = "panel";
@@ -2424,7 +2843,7 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
           <div class="label-tabs" data-el="label-tabs"></div>
         </div>
       `;
-      wrap.appendChild(labelPanel);
+      sectionBody.appendChild(labelPanel);
 
       const samplePanel = document.createElement("div");
       samplePanel.className = "panel";
@@ -2439,11 +2858,11 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
           <div class="section-colorbar" data-el="section-colorbar"></div>
         </div>
       `;
-      wrap.appendChild(samplePanel);
+      sectionBody.appendChild(samplePanel);
 
       const models = document.createElement("main");
       models.className = "models";
-      wrap.appendChild(models);
+      sectionBody.appendChild(models);
 
       const els = {
         groupPanel,
@@ -2461,7 +2880,7 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
       };
 
       function sectionGroups() {
-        return section.groups || [];
+        return interactiveGroups;
       }
 
       function currentGroup() {
@@ -2505,9 +2924,9 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         const group = currentGroup();
         if (!group || !state.label) return [];
 
-        const models = group.models || [];
+        const modelList = group.models || [];
         let longest = [];
-        for (const model of models) {
+        for (const model of modelList) {
           const gamma = model.selected_gamma;
           const labelMap = (((model.gammas || {})[gamma] || {})[state.label]) || {};
           const ordered = Object.keys(labelMap);
@@ -2524,6 +2943,172 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         if (state.sampleIndex < 0) state.sampleIndex = 0;
         if (state.sampleIndex >= samples.length) state.sampleIndex = samples.length - 1;
         return samples[state.sampleIndex];
+      }
+
+      function labelText(label) {
+        const n = Number(String(label).replace("label_", ""));
+        if (Number.isNaN(n)) return String(label).replace("label_", "");
+        return String(n);
+      }
+
+      function renderIntroPreview() {
+        if (!previewGroup) return;
+        const previewRoot = wrap.querySelector(".ablation-preview-grid");
+        if (!previewRoot) return;
+        previewRoot.innerHTML = "";
+
+        const previewModels = Array.isArray(previewGroup.models) ? previewGroup.models : [];
+        const exampleMap = new Map();
+
+        for (const model of previewModels) {
+          const gamma = model.selected_gamma;
+          const modelLabelMap = ((model.gammas || {})[gamma]) || {};
+          Object.keys(modelLabelMap).forEach((label) => {
+            const sampleMap = modelLabelMap[label] || {};
+            Object.keys(sampleMap).forEach((sampleName) => {
+              const key = `${label}::${sampleName}`;
+              if (!exampleMap.has(key)) {
+                exampleMap.set(key, { label, sampleName });
+              }
+            });
+          });
+        }
+
+        const examples = Array.from(exampleMap.values()).sort((a, b) => {
+          const labelCmp = naturalCompare(a.label, b.label);
+          if (labelCmp !== 0) return labelCmp;
+          return naturalCompare(a.sampleName, b.sampleName);
+        });
+
+        for (const example of examples) {
+          const exampleBox = document.createElement("article");
+          exampleBox.className = "ablation-preview-example";
+
+          const head = document.createElement("div");
+          head.className = "ablation-preview-example-head";
+          const badge = document.createElement("span");
+          badge.className = "all-sample-label";
+          badge.textContent = `Label ${labelText(example.label)}`;
+          head.appendChild(badge);
+          exampleBox.appendChild(head);
+
+          const modelGrid = document.createElement("div");
+          modelGrid.className = "ablation-preview-models";
+          exampleBox.appendChild(modelGrid);
+
+          for (const model of previewModels) {
+            const gamma = model.selected_gamma;
+            const modelLabelMap = ((model.gammas || {})[gamma]) || {};
+            const modelSpecMap = ((model.spectrograms || {})[gamma]) || {};
+            const url = ((modelLabelMap[example.label] || {})[example.sampleName]) || null;
+            const spectrogramUrl = ((modelSpecMap[example.label] || {})[example.sampleName]) || null;
+
+            const modelBox = document.createElement("div");
+            modelBox.className = "ablation-preview-model";
+            const modelTitle = document.createElement("div");
+            modelTitle.className = "ablation-preview-model-title";
+            modelTitle.textContent = model.title || model.id;
+            modelBox.appendChild(modelTitle);
+            appendSampleMedia(modelBox, url, spectrogramUrl, "Sample missing for this model/example.");
+            modelGrid.appendChild(modelBox);
+          }
+
+          previewRoot.appendChild(exampleBox);
+        }
+      }
+
+      function appendSampleMedia(container, url, spectrogramUrl, missingText) {
+        let audio = null;
+
+        if (url) {
+          audio = document.createElement("audio");
+          audio.controls = true;
+          audio.preload = "none";
+          audio.src = url;
+        } else {
+          const missing = document.createElement("div");
+          missing.className = "missing";
+          missing.textContent = missingText;
+          container.appendChild(missing);
+        }
+
+        if (spectrogramUrl) {
+          const specWrap = document.createElement("div");
+          specWrap.className = "spectrogram-wrap";
+
+          const specStage = document.createElement("div");
+          specStage.className = "spectrogram-stage";
+
+          const specImg = document.createElement("img");
+          specImg.className = "spectrogram-img";
+          specImg.loading = "lazy";
+          specImg.alt = "Spectrogram";
+          specImg.src = spectrogramUrl;
+
+          const specCursor = document.createElement("div");
+          specCursor.className = "spectrogram-cursor";
+
+          specStage.appendChild(specImg);
+          specStage.appendChild(specCursor);
+          specWrap.appendChild(specStage);
+
+          const specSlider = document.createElement("input");
+          specSlider.className = "spectrogram-slider";
+          specSlider.type = "range";
+          specSlider.min = "0";
+          specSlider.max = "1000";
+          specSlider.step = "1";
+          specSlider.value = "0";
+          specSlider.disabled = !audio;
+          specWrap.appendChild(specSlider);
+
+          const setProgress = (fraction) => {
+            const clamped = Math.min(1, Math.max(0, Number(fraction) || 0));
+            specCursor.style.left = `${(clamped * 100).toFixed(3)}%`;
+            specSlider.value = String(Math.round(clamped * 1000));
+          };
+          setProgress(0);
+
+          if (audio) {
+            const syncFromAudio = () => {
+              if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+              setProgress(audio.currentTime / audio.duration);
+            };
+
+            const seekByFraction = (fraction) => {
+              if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+              audio.currentTime = Math.min(1, Math.max(0, fraction)) * audio.duration;
+              syncFromAudio();
+            };
+
+            audio.addEventListener("loadedmetadata", syncFromAudio);
+            audio.addEventListener("timeupdate", syncFromAudio);
+            audio.addEventListener("seeked", syncFromAudio);
+
+            specSlider.addEventListener("input", () => {
+              const fraction = Number(specSlider.value) / 1000;
+              seekByFraction(fraction);
+            });
+
+            specStage.addEventListener("click", (event) => {
+              const rect = specStage.getBoundingClientRect();
+              if (rect.width <= 0) return;
+              const fraction = (event.clientX - rect.left) / rect.width;
+              seekByFraction(fraction);
+            });
+          }
+
+          container.appendChild(specWrap);
+        } else if (spectrogramsEnabled) {
+          const specMissing = document.createElement("div");
+          specMissing.className = "tiny";
+          specMissing.textContent = "Spectrogram is missing for this sample.";
+          container.appendChild(specMissing);
+        }
+
+        if (audio) {
+          container.appendChild(audio);
+        }
       }
 
       function renderGroupTabs() {
@@ -2553,9 +3138,8 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
 
         els.labelTabs.innerHTML = "";
         labels.forEach((label) => {
-          const n = Number(String(label).replace("label_", ""));
           const btn = document.createElement("button");
-          btn.textContent = Number.isNaN(n) ? label.replace("label_", "") : String(n);
+          btn.textContent = labelText(label);
           btn.className = label === state.label ? "active" : "";
           btn.onclick = () => {
             state.label = label;
@@ -2648,7 +3232,6 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
 
       function renderModels() {
         const group = currentGroup();
-        const sampleName = currentSampleName();
         els.models.innerHTML = "";
 
         if (!group || !Array.isArray(group.models) || !group.models.length) {
@@ -2657,14 +3240,6 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         }
 
         for (const model of group.models) {
-          const gamma = model.selected_gamma;
-          const labelMap = (((model.gammas || {})[gamma] || {})[state.label]) || {};
-          const modelSampleNames = Object.keys(labelMap);
-          const modelSampleName = modelSampleNames[state.sampleIndex] || null;
-          const url = modelSampleName ? labelMap[modelSampleName] : null;
-          const spectrogramLabelMap = (((model.spectrograms || {})[gamma] || {})[state.label]) || {};
-          const spectrogramUrl = modelSampleName ? spectrogramLabelMap[modelSampleName] : null;
-
           const card = document.createElement("article");
           card.className = "card";
 
@@ -2679,98 +3254,14 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
             sourceNote.innerHTML = `${escapeHtml(sourceText)} <a class="source-link" href="${escapeHtml(model.sample_source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(model.sample_source_url)}</a>`;
             card.appendChild(sourceNote);
           }
-
-          let audio = null;
-
-          if (url) {
-            audio = document.createElement("audio");
-            audio.controls = true;
-            audio.preload = "none";
-            audio.src = url;
-          } else {
-            const missing = document.createElement("div");
-            missing.className = "missing";
-            missing.textContent = "Sample missing for current model / label.";
-            card.appendChild(missing);
-          }
-
-          if (spectrogramUrl) {
-            const specWrap = document.createElement("div");
-            specWrap.className = "spectrogram-wrap";
-
-            const specStage = document.createElement("div");
-            specStage.className = "spectrogram-stage";
-
-            const specImg = document.createElement("img");
-            specImg.className = "spectrogram-img";
-            specImg.loading = "lazy";
-            specImg.alt = "Spectrogram";
-            specImg.src = spectrogramUrl;
-
-            const specCursor = document.createElement("div");
-            specCursor.className = "spectrogram-cursor";
-
-            specStage.appendChild(specImg);
-            specStage.appendChild(specCursor);
-            specWrap.appendChild(specStage);
-
-            const specSlider = document.createElement("input");
-            specSlider.className = "spectrogram-slider";
-            specSlider.type = "range";
-            specSlider.min = "0";
-            specSlider.max = "1000";
-            specSlider.step = "1";
-            specSlider.value = "0";
-            specSlider.disabled = !audio;
-            specWrap.appendChild(specSlider);
-
-            const setProgress = (fraction) => {
-              const clamped = Math.min(1, Math.max(0, Number(fraction) || 0));
-              specCursor.style.left = `${(clamped * 100).toFixed(3)}%`;
-              specSlider.value = String(Math.round(clamped * 1000));
-            };
-            setProgress(0);
-
-            if (audio) {
-              const syncFromAudio = () => {
-                if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
-                setProgress(audio.currentTime / audio.duration);
-              };
-
-              const seekByFraction = (fraction) => {
-                if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
-                audio.currentTime = Math.min(1, Math.max(0, fraction)) * audio.duration;
-                syncFromAudio();
-              };
-
-              audio.addEventListener("loadedmetadata", syncFromAudio);
-              audio.addEventListener("timeupdate", syncFromAudio);
-              audio.addEventListener("seeked", syncFromAudio);
-
-              specSlider.addEventListener("input", () => {
-                const fraction = Number(specSlider.value) / 1000;
-                seekByFraction(fraction);
-              });
-
-              specStage.addEventListener("click", (event) => {
-                const rect = specStage.getBoundingClientRect();
-                if (rect.width <= 0) return;
-                const fraction = (event.clientX - rect.left) / rect.width;
-                seekByFraction(fraction);
-              });
-            }
-
-            card.appendChild(specWrap);
-          } else if (spectrogramsEnabled) {
-            const specMissing = document.createElement("div");
-            specMissing.className = "tiny";
-            specMissing.textContent = "Spectrogram is missing for this sample.";
-            card.appendChild(specMissing);
-          }
-
-          if (audio) {
-            card.appendChild(audio);
-          }
+          const gamma = model.selected_gamma;
+          const labelMap = (((model.gammas || {})[gamma] || {})[state.label]) || {};
+          const modelSampleNames = Object.keys(labelMap);
+          const modelSampleName = modelSampleNames[state.sampleIndex] || null;
+          const url = modelSampleName ? labelMap[modelSampleName] : null;
+          const spectrogramLabelMap = (((model.spectrograms || {})[gamma] || {})[state.label]) || {};
+          const spectrogramUrl = modelSampleName ? spectrogramLabelMap[modelSampleName] : null;
+          appendSampleMedia(card, url, spectrogramUrl, "Sample missing for current model / label.");
 
           els.models.appendChild(card);
         }
@@ -2842,6 +3333,7 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
       });
 
       wrap.tabIndex = 0;
+      renderIntroPreview();
       render();
       return wrap;
     }
@@ -2853,6 +3345,19 @@ __AUDIO_EXAMPLES_MANIFEST_END__</script>
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    }
+
+    function formatRichText(value) {
+      let raw = String(value ?? "").replace(/\r\n/g, "\n");
+      raw = raw.replace(/\\n/g, "\n");
+      const parts = raw.split(/\n\s*---\s*\n/g);
+      const rendered = parts.map((part) => {
+        let escaped = escapeHtml(part);
+        escaped = escaped.replace(/\{\{label:([^\n{}]+?)\}\}/g, '<span class="all-sample-label inline-label-badge">$1</span>');
+        escaped = escaped.replace(/\*\*([^\n]+?)\*\*/g, "<strong>$1</strong>");
+        return escaped;
+      });
+      return rendered.join('<span class="text-separator-gap" aria-hidden="true"></span>');
     }
   </script>
 </body>
